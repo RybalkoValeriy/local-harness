@@ -1,0 +1,78 @@
+<div class="shell with-files ide-layout" data-controller="chat file-tree" data-chat-url-value="<%= @conversation ? run_project_conversation_path(@project, @conversation) : '' %>" data-file-tree-url-value="<%= files_project_path(@project) %>" data-file-tree-file-url-value="<%= file_project_path(@project) %>">
+  <aside class="sidebar">
+    <a class="brand" href="/"><span class="brand-icon">⌘</span> Local Harness</a>
+    <p class="eyebrow">YOUR LOCAL WORKBENCH</p>
+    <%= link_to "All projects", projects_path, class: "new-chat" %>
+    <label class="eyebrow" for="project-switcher">PROJECT</label>
+    <select id="project-switcher" data-action="change->chat#switchProject" aria-label="Switch project">
+      <% @projects.each do |project| %><option value="<%= project_path(project) %>" <%= "selected" if project == @project %>><%= project.name %></option><% end %>
+    </select>
+    <%= button_to "+ New conversation", project_conversations_path(@project), class: "new-chat" %>
+    <nav class="threads" aria-label="Conversations">
+      <% @conversations.each do |conversation| %>
+        <%= link_to conversation.title, project_conversation_path(@project, conversation), class: "thread #{'active' if conversation == @conversation}" %>
+      <% end %>
+    </nav>
+    <div class="sidebar-footer"><span class="status-dot"></span> Runs on your machine<br><small>Rails · LM Studio · SQLite</small></div>
+  </aside>
+  <main>
+    <header class="topbar">
+      <div><%= link_to "ALL PROJECTS", projects_path, class: "eyebrow" %><h1><%= @conversation&.title || @project.name %></h1></div>
+      <button class="connection" data-action="chat#checkConnection" data-chat-target="connection">Checking LM Studio…</button>
+    </header>
+    <section class="workspace-strip"><span title="<%= @project.path %>"><%= @project.name %> · <%= @project.path %></span><span>Read · Create · Edit files</span><span>No step limit</span></section>
+    <% unless @project.available? %><div class="error" role="alert">Project folder is unavailable: <%= @project.path %>. Restore this folder before sending a message.</div><% end %>
+    <div class="chat-scroll" data-chat-target="scroll">
+      <section class="messages" data-chat-target="messages" aria-live="polite" aria-label="Messages">
+        <% if @conversation.nil? || @conversation.messages.empty? %>
+          <div class="welcome" data-chat-target="welcome">
+            <span class="welcome-icon">✳</span><p class="eyebrow">SMALL MODEL. REAL POSSIBILITIES.</p>
+            <h2>What will you explore?</h2>
+            <p>A local assistant with a clear view of every step.<br>Inspect your project, create files, or edit existing code.</p>
+            <% if @conversation %>
+              <div class="suggestions"><button data-action="chat#suggest" data-prompt="List the files in my workspace and explain what this project does.">Explore my workspace <span>↗</span></button><button data-action="chat#suggest" data-prompt="Create a new docs/project-plan.md file with a short project plan. Ask me what I want to build first if you need more information.">Create a project plan <span>↗</span></button></div>
+            <% else %>
+              <%= button_to "Start your first conversation →", project_conversations_path(@project), class: "primary" %>
+            <% end %>
+          </div>
+        <% end %>
+        <% @conversation&.messages&.each do |message| %>
+          <% if message.role == 'tool' %>
+            <details class="tool"><summary>◇ <%= message.metadata['name'] %></summary><pre><%= message.content %></pre></details>
+          <% elsif message.role == 'assistant' && message.content.blank? %>
+            <% next %>
+          <% else %>
+            <article class="message <%= message.role %>"><div class="message-label"><%= { 'user' => 'YOU', 'assistant' => 'QWEN', 'error' => 'CONNECTION / RUN ERROR' }[message.role] %></div><div class="message-content"><%= message.content %></div></article>
+          <% end %>
+        <% end %>
+      </section>
+    </div>
+    <% if @conversation %>
+      <div class="composer-wrap">
+        <div class="run-status" data-chat-target="status" role="status">Ready when you are.</div>
+        <form class="composer" data-action="submit->chat#send">
+          <label class="sr-only" for="prompt">Message</label><textarea id="prompt" data-chat-target="input" data-action="keydown->chat#keydown" placeholder="Ask your local assistant anything…" rows="2" maxlength="8000" required></textarea>
+          <div class="composer-bottom"><span><span class="status-dot"></span> <%= LmStudio.model %></span><button type="submit" class="send" data-chat-target="submit" aria-label="Send message">↑</button></div>
+        </form>
+        <p class="composer-hint">Enter to send · Shift + Enter for a new line <span>Local model · Check important answers</span></p>
+      </div>
+    <% end %>
+  </main>
+  <aside class="project-files">
+    <details open>
+      <summary>Project files</summary>
+      <button type="button" data-action="file-tree#refresh" class="file-tree-refresh">Refresh files</button>
+      <p class="file-tree-status" data-file-tree-target="status" role="status">Loading files…</p>
+      <nav class="file-tree" data-file-tree-target="tree" aria-label="Project files"></nav>
+    </details>
+  </aside>
+  <section class="file-editor" aria-label="Code viewer">
+    <div class="editor-tabs" role="tablist" aria-label="Open files" data-file-tree-target="tabs"></div>
+    <div class="editor-empty" data-file-tree-target="empty"><strong>Your project, in view</strong><p>Select a file from the tree to open it here.<br>Keep chatting while the agent updates your files.</p></div>
+    <section class="editor-document" id="editor-document" role="tabpanel" data-file-tree-target="viewer" hidden>
+      <header><strong data-file-tree-target="filename"></strong><span>Read only · synced from disk</span></header>
+      <p class="file-viewer-status" data-file-tree-target="fileStatus" role="status"></p>
+      <pre tabindex="0" aria-label="File contents"><span class="line-numbers" data-file-tree-target="lineNumbers" aria-hidden="true"></span><code data-file-tree-target="code"></code></pre>
+    </section>
+  </section>
+</div>

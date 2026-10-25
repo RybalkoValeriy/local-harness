@@ -1,0 +1,33 @@
+<main class="projects-page">
+  <header><p class="eyebrow">LOCAL HARNESS</p><h1>Your projects</h1><p>Open a folder, keep its conversations together, and work with your local model.</p></header>
+  <% if @project.errors.any? %><div class="error" role="alert"><%= @project.errors.full_messages.to_sentence %></div><% end %>
+  <section class="project-grid" aria-label="Projects">
+    <% @projects.each do |project| %>
+      <%= link_to project_path(project), class: "project-card" do %>
+        <h2><%= project.name %></h2><code><%= project.path %></code>
+        <p><%= project.available? ? "Open project" : "Folder unavailable — check its location" %></p>
+      <% end %>
+    <% end %>
+  </section>
+  <div class="project-grid">
+    <section class="project-form"><h2>Open existing folder</h2><p>Register a folder without moving or changing its files.</p>
+      <%= form_with scope: :project, url: projects_path, data: { controller: "folder-picker" } do |form| %>
+        <%= form.hidden_field :mode, value: "existing" %>
+        <%= form.label :name, "Project name", for: "existing_name" %><%= form.text_field :name, id: "existing_name", required: true, maxlength: 100, value: params.dig(:project, :mode) == "existing" ? params.dig(:project, :name) : nil, data: { folder_picker_target: "name" } %>
+        <%= form.label :path, "Absolute folder path", for: "existing_path" %><%= form.text_field :path, id: "existing_path", required: true, value: params.dig(:project, :mode) == "existing" ? params.dig(:project, :path) : nil, placeholder: 'C:\Users\Valeriy\Projects\AAA or /home/val/code/AAA', data: { folder_picker_target: "path" } %>
+        <%= render "folder_picker" %>
+        <%= form.submit "Open folder", class: "primary" %>
+      <% end %>
+    </section>
+    <section class="project-form"><h2>Create project</h2><p>Create an empty folder. Framework setup will be a separate step.</p>
+      <%= form_with scope: :project, url: projects_path, data: { controller: "folder-picker" } do |form| %>
+        <%= form.hidden_field :mode, value: "new" %>
+        <%= form.label :name, "Project name", for: "new_name" %><%= form.text_field :name, id: "new_name", required: true, maxlength: 100, value: params.dig(:project, :mode) == "new" ? params.dig(:project, :name) : nil, data: { folder_picker_target: "name" } %>
+        <%= form.label :path, "Existing parent folder", for: "new_path" %><%= form.text_field :path, id: "new_path", required: true, value: params.dig(:project, :mode) == "new" ? params.dig(:project, :path) : nil, placeholder: "/home/val/code", data: { folder_picker_target: "path" } %>
+        <%= render "folder_picker" %>
+        <%= form.label :folder, "New folder name", for: "new_folder" %><%= form.text_field :folder, id: "new_folder", required: true, value: params.dig(:project, :mode) == "new" ? params.dig(:project, :folder) : nil, pattern: "[a-zA-Z0-9][a-zA-Z0-9_\\-]{0,79}", placeholder: "AAA" %>
+        <%= form.submit "Create project", class: "primary" %>
+      <% end %>
+    </section>
+  </div>
+</main>
