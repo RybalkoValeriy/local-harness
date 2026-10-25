@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="$HOME/.rbenv/shims:$HOME/.rbenv/bin:$PATH"
+cd "$(dirname "$0")/.."
+if [ -z "${LM_STUDIO_URL:-}" ]; then
+  host=$(ip route show default | awk '{print $3; exit}')
+  if curl --silent --fail --max-time 2 http://127.0.0.1:1234/v1/models >/dev/null; then
+    export LM_STUDIO_URL=http://127.0.0.1:1234/v1
+  else
+    export LM_STUDIO_URL="http://$host:1234/v1"
+  fi
+fi
+export LM_STUDIO_MODEL="${LM_STUDIO_MODEL:-qwen/qwen3.5-9b}"
+bin/rails db:prepare
+bash bin/build-frontend run build
+echo "LM Studio: $LM_STUDIO_URL ($LM_STUDIO_MODEL)"
+exec bin/rails server -b 127.0.0.1 -p "${PORT:-3000}"

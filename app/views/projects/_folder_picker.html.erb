@@ -1,0 +1,15 @@
+<button type="button" class="browse-button" data-action="folder-picker#open">Browse folders…</button>
+<dialog class="folder-dialog" data-folder-picker-target="dialog" aria-label="Choose folder">
+  <header><h2>Choose folder</h2><button type="button" data-action="folder-picker#close" aria-label="Close folder browser">Close</button></header>
+  <p>Browse Windows drives or Linux folders on this computer.</p>
+  <div class="folder-location">
+    <button type="button" data-action="folder-picker#up">Parent</button>
+    <input type="text" aria-label="Browse folder path" data-folder-picker-target="location" data-action="keydown.enter->folder-picker#go">
+    <button type="button" data-action="folder-picker#go">Go</button>
+  </div>
+  <nav class="folder-shortcuts" aria-label="Folder shortcuts" data-folder-picker-target="shortcuts"></nav>
+  <p class="folder-current" data-folder-picker-target="current" aria-live="polite"></p>
+  <p class="folder-error" data-folder-picker-target="error" role="status"></p>
+  <div class="folder-entries" data-folder-picker-target="entries" aria-label="Subfolders"></div>
+  <footer><button type="button" class="primary" data-folder-picker-target="choose" data-action="folder-picker#choose" disabled>Select this folder</button></footer>
+</dialog>

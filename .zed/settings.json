@@ -1,0 +1,16 @@
+{
+  "languages": {
+    "Ruby": {
+      "language_servers": ["ruby-lsp"]
+    },
+    "HTML+ERB": {
+      "language_servers": ["ruby-lsp"]
+    }
+  },
+  "toolbar": {
+    "breadcrumbs": true
+  },
+  "project_panel": {
+    "auto_reveal_entries": true
+  }
+}

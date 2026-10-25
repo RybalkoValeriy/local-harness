@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+# Use native Node in WSL when installed, otherwise the existing Windows Node.
+if command -v node >/dev/null 2>&1; then
+  npm "$@"
+else
+  cmd.exe /c npm.cmd "$@"
+fi

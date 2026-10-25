@@ -1,0 +1,18 @@
+{
+  "name": "local-harness",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && esbuild app/javascript/application.ts --bundle --format=esm --target=es2022 --outfile=app/assets/builds/application.js",
+    "watch": "esbuild app/javascript/application.ts --bundle --format=esm --target=es2022 --outfile=app/assets/builds/application.js --watch"
+  },
+  "dependencies": {
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo": "^8.0.0",
+    "highlight.js": "^11.12.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0"
+  }
+}
